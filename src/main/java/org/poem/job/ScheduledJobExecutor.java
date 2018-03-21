@@ -4,6 +4,7 @@ import org.poem.common.key.JobDetailPrimaryKey;
 import org.poem.common.utils.ApplicationContext;
 import org.poem.entity.TimeTask;
 import org.quartz.Job;
+import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
@@ -34,6 +35,8 @@ public class ScheduledJobExecutor implements Job {
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         TimeTask config = (TimeTask) jobExecutionContext.getMergedJobDataMap().get(JobDetailPrimaryKey.DETAIL_KEY);
         Long startTime = System.currentTimeMillis();
+
+
         try {
             if (config != null) {
                 Class clazz;
@@ -46,13 +49,32 @@ public class ScheduledJobExecutor implements Job {
                     }
                     clazz = clsObj.getClass();
                     //得到指定的方法
-                    Method method = clazz.getDeclaredMethod(config.getTaskClassMethod());
+                    Method method = null;
+                    if (!StringUtils.isEmpty(config.getParams())){
+                        String[] params = config.getParams().split(",");
+                        Class[] c = new Class[params.length];
+                        for (int i = 0; i < params.length; i++) {
+                            c[i] = params[i].split("=")[1].getClass();
+                        }
+                        method = clazz.getDeclaredMethod(config.getTaskClassMethod(), c );
+                    }else {
+                        method = clazz.getDeclaredMethod(config.getTaskClassMethod());
+                    }
                     if (null == method) {
                         logger.info("定时任务:" + config.getTaskName() + "指定的方法未被Spring找到!");
                         return;
                     }
                     //执行方法
-                    method.invoke(clsObj);
+                    if (!StringUtils.isEmpty(config.getParams())){
+                        String[] params = config.getParams().split(",");
+                        Object[] obj = new Object[params.length];
+                        for (int i = 0; i < params.length; i++) {
+                            obj[i] = params[i].split("=")[1];
+                        }
+                        method.invoke(clsObj, obj);
+                    }else {
+                        method.invoke(clsObj);
+                    }
                 }
             }
         }catch(Exception e){

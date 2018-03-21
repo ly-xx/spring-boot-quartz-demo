@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
- * 查詢全部的數據
+ * 查詢全部的数据
  */
 @Service
 public class TimeTaskServiceImpl implements TimeTaskService {
@@ -24,5 +24,10 @@ public class TimeTaskServiceImpl implements TimeTaskService {
     @Override
     public List<TimeTask> findAllTask() {
         return this.timeTaskDao.findAll();
+    }
+
+    @Override
+    public TimeTask save(TimeTask task) {
+        return timeTaskDao.save(task);
     }
 }

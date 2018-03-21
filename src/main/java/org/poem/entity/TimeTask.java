@@ -45,6 +45,12 @@ public class TimeTask extends IdEntity {
     @Column(name = "DESCRIPTION")
     private String description;
 
+    /**
+     * 需要传递的参数
+     */
+    @Column(name = "PARAMS")
+    private String params;
+
     public String getTaskName() {
         return taskName;
     }
@@ -91,6 +97,14 @@ public class TimeTask extends IdEntity {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getParams() {
+        return params;
+    }
+
+    public void setParams(String params) {
+        this.params = params;
     }
 
     @Override

@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -64,13 +65,19 @@ public class TaskManageServiceImpl implements TaskManageService {
             }
             //添加任务
             if(timeTask.getTimeTaskSwitch()){
+
                 /**
                  * Create a JobBuilder with which to define a JobDetail,
                  * and set the class name of the Job to be executed.
                  */
                 JobDetail jobDetail = JobBuilder.newJob(ScheduledJobExecutor.class).withIdentity(new JobKey(timeTask.getId())).build();
                 jobDetail.getJobDataMap().put(JobDetailPrimaryKey.DETAIL_KEY,timeTask);
-                //设置表达式
+                if (!StringUtils.isEmpty(timeTask.getParams())){
+                    String[] params = timeTask.getParams().split(",");
+                    jobDetail.getJobDataMap().put("id", params[0].split("=")[1]);
+                    jobDetail.getJobDataMap().put("name", params[1].split("=")[1]);
+                }
+                // /设置表达式
                 CronScheduleBuilder cronScheduleBuilder = CronScheduleBuilder.cronSchedule(timeTask.getCronScheduleExpression());
                 //创建一个新的Tigger
                 Trigger trigger = TriggerBuilder.newTrigger().withIdentity(timeTask.getId()).withSchedule(cronScheduleBuilder).build();
